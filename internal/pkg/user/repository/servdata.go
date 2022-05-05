@@ -4,12 +4,7 @@ import (
 	"codex/internal/pkg/database"
 	"codex/internal/pkg/domain"
 	"codex/internal/pkg/utils/cast"
-	_ "codex/internal/pkg/utils/cast"
 	"codex/internal/pkg/utils/log"
-
-	"encoding/binary"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 type dbUserRepository struct {
@@ -20,32 +15,6 @@ func InitUsrRep(manager *database.DBManager) domain.UserRepository {
 	return &dbUserRepository{
 		dbm: manager,
 	}
-}
-
-func (ur *dbUserRepository) GetByEmail(email string) (domain.User, error) {
-	resp, err := ur.dbm.Query(queryGetByEmail, email)
-	if len(resp) == 0 {
-		log.Warn("{GetByEmail}")
-		log.Error(domain.Err.ErrObj.NoUser)
-		return domain.User{}, domain.Err.ErrObj.NoUser
-	}
-	if err != nil {
-		log.Warn("{GetByEmail} in query: " + queryGetByEmail)
-		log.Error(err)
-		return domain.User{}, domain.Err.ErrObj.InternalServer
-	}
-
-	row := resp[0]
-	out := domain.User{
-		Id:             cast.ToUint64(row[0]),
-		Username:       cast.ToString(row[1]),
-		Password:       cast.ToString(row[4]),
-		Email:          cast.ToString(row[2]),
-		Imgsrc:         cast.ToString(row[3]),
-		RepeatPassword: cast.ToString(row[4]),
-	}
-
-	return out, nil
 }
 
 func (ur *dbUserRepository) GetById(id uint64) (domain.User, error) {
@@ -63,55 +32,50 @@ func (ur *dbUserRepository) GetById(id uint64) (domain.User, error) {
 
 	row := resp[0]
 	out := domain.User{
-		Id:             binary.BigEndian.Uint64(row[0]),
-		Username:       string(row[1]),
+		Id:             cast.ToUint64(row[0]),
+		Username:       cast.ToString(row[1]),
 		Password:       "",
-		Email:          string(row[2]),
-		Imgsrc:         string(row[3]),
+		Email:          cast.ToString(row[2]),
+		Imgsrc:         cast.ToString(row[3]),
 		RepeatPassword: "",
 	}
 
 	return out, nil
 }
 
-func (ur *dbUserRepository) AddUser(us domain.User) (uint64, error) {
-	passwordByte, err := bcrypt.GenerateFromPassword([]byte(us.Password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Warn("{AddUser}")
-		log.Error(err)
-		return 0, domain.Err.ErrObj.InternalServer
-	}
-
-	resp, err := ur.dbm.Query(queryAddUser, us.Username, us.Email, passwordByte)
-	if err != nil {
-		log.Warn("{AddUser} in query: " + queryAddUser)
-		log.Error(err)
-		return 0, err
-	}
-
-	return binary.BigEndian.Uint64(resp[0][0]), nil
-}
-
 func (ur *dbUserRepository) GetBookmarks(id uint64) ([]domain.Bookmark, error) {
-	var alabd = []domain.Bookmark{
-		{
-			Id:          "1",
-			Description: "love these",
-			Imgsrc:      "/bookmark.webp",
-		},
-		{
-			Id:          "2",
-			Description: "When Im sad",
-			Imgsrc:      "/bookmark.webp",
-		},
-		{
-			Id:          "3",
-			Description: "trash",
-			Imgsrc:      "/bookmark.webp",
-		},
+	resp, err := ur.dbm.Query(queryUserExist, id)
+	if err != nil {
+		log.Warn("{GetBookmarks} in query: " + queryUserExist)
+		log.Error(err)
+		return []domain.Bookmark{}, domain.Err.ErrObj.InternalServer
+	}
+	if cast.ToUint64(resp[0][0]) == 0 {
+		log.Warn("{GetBookmarks}")
+		log.Error(domain.Err.ErrObj.InvalidId)
+		return []domain.Bookmark{}, domain.Err.ErrObj.InvalidId
 	}
 
-	return alabd, nil
+	resp, err = ur.dbm.Query(queryGetUserBookmarks, id)
+	if err != nil {
+		log.Warn("{GetBookmarks} in query: " + queryGetUserBookmarks)
+		log.Error(err)
+		return []domain.Bookmark{}, domain.Err.ErrObj.InternalServer
+	}
+	if len(resp) == 0 {
+		return []domain.Bookmark{}, nil
+	}
+
+	out := make([]domain.Bookmark, 0)
+	for i := range resp {
+		out = append(out, domain.Bookmark{
+			Id:          cast.IntToStr(cast.ToUint64(resp[i][0])),
+			Description: cast.ToString(resp[i][1]),
+			Imgsrc:      cast.ToString(resp[i][2]),
+		})
+	}
+
+	return out, nil
 }
 
 func (ur *dbUserRepository) UpdateUser(id uint64, upd domain.UpdUser) (domain.User, error) {
@@ -169,7 +133,7 @@ func (ur *dbUserRepository) GetUserReviews(id uint64) ([]domain.UserReview, erro
 
 				Rating: "",
 
-				Date:         cast.ToString(resp[i][1]),
+				Date:         cast.TimeToStr(cast.ToTime(resp[i][1]), true),
 				FeedbackType: "",
 				MovieTitle:   cast.ToString(resp[i][3]),
 			}
@@ -189,14 +153,17 @@ func (ur *dbUserRepository) GetUserReviews(id uint64) ([]domain.UserReview, erro
 
 	return out, nil
 }
-func (ur *dbUserRepository) UpdateAvatar(clientID uint64, url string) (domain.User, error) {
-	_, err := ur.dbm.Query(queryUpdAvatarByUsID, clientID, url)
+
+func (ur *dbUserRepository) UpdateAvatar(clientId uint64, url string) (domain.User, error) {
+	_, err := ur.dbm.Query(queryUpdAvatarByUsID, clientId, url)
 	if err != nil {
 		return domain.User{}, err
 	}
-	updated, err := ur.GetById(clientID)
+
+	updated, err := ur.GetById(clientId)
 	if err != nil {
 		return domain.User{}, err
 	}
+
 	return updated, err
 }

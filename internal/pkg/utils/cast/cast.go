@@ -3,9 +3,10 @@ package cast
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/jackc/pgx/pgtype"
 	"math"
 	"time"
+
+	"github.com/jackc/pgx/pgtype"
 )
 
 func ToString(src []byte) string {
@@ -20,8 +21,11 @@ func FlToStr(src float64) string {
 	return fmt.Sprintf("%.1f", src)
 }
 
-func DateToStr(src time.Time) string {
-	return src.String()
+func TimeToStr(src time.Time, withTime bool) string {
+	if withTime {
+		return src.Format("2006-01-02 15:04:05")
+	}
+	return src.Format("2006-01-02")
 }
 
 func ToUint64(src []byte) uint64 {
@@ -33,7 +37,19 @@ func ToFloat64(src []byte) float64 {
 }
 
 func ToTime(src []byte) time.Time {
-	timeBuffer := pgtype.Timestamp{}
-	timeBuffer.DecodeBinary(nil, src)
-	return timeBuffer.Time
+	tmp := pgtype.Timestamp{}
+	tmp.DecodeBinary(nil, src)
+	return tmp.Time
+}
+
+func ToDate(src []byte) time.Time {
+	tmp := pgtype.Timestamp{}
+	tmp.DecodeBinary(nil, src)
+	return tmp.Time
+}
+
+func ToBool(src []byte) bool {
+	tmp := pgtype.Bool{}
+	tmp.DecodeBinary(nil, src)
+	return tmp.Bool
 }

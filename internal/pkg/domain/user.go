@@ -1,6 +1,6 @@
 package domain
 
-const BaseUserPicture = "/profile.svg"
+const BaseUserPicture = "/static/avatars/profile.svg"
 
 type User struct {
 	Id             uint64 `json:"ID"`
@@ -22,15 +22,19 @@ type UserBasic struct {
 	Password string `json:"password"`
 }
 
-type UpdUser struct {
+type UserPublicInfo struct {
+	Id       uint64 `json:"ID"`
 	Username string `json:"name"`
+	Imgsrc   string `json:"imgsrc"`
+}
+
+type UpdUser struct {
+	Username string `json:"username"`
 	Imgsrc   string `json:"imgsrc"`
 }
 
 type UserRepository interface {
 	GetById(id uint64) (User, error)
-	GetByEmail(email string) (User, error)
-	AddUser(user User) (uint64, error)
 	GetBookmarks(id uint64) ([]Bookmark, error)
 	UpdateUser(id uint64, upd UpdUser) (User, error)
 	GetUserReviews(id uint64) ([]UserReview, error)
@@ -38,9 +42,6 @@ type UserRepository interface {
 }
 
 type UserUsecase interface {
-	Register(us User) (User, error)
-	Login(ub UserBasic) (User, error)
-	CheckAuth(id uint64) (User, error)
 	GetBasicInfo(id uint64) (User, error)
 	GetBookmarks(id uint64) ([]Bookmark, error)
 	UpdateUser(id uint64, upd UpdUser) (User, error)

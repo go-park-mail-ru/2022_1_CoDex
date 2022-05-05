@@ -50,30 +50,11 @@ func (mu movieUsecase) GetReviewRating(movieId, userId uint64) (string, string, 
 	return reviewExist, userRating, nil
 }
 
-func (mu movieUsecase) PostRating(movieId uint64, userId uint64, rating int) (float64, error) {
-	if rating < 1 || rating > 10 {
-		return 0.0, domain.Err.ErrObj.InvalidRating
-	}
-
-	newRating, err := mu.movieRepo.PostRating(movieId, userId, rating)
+func (mu movieUsecase) GetCollectionsInfo (userId, movieId uint64) ([]domain.CollectionInfo, error) {
+	CollectionsInfo, err := mu.movieRepo.GetCollectionsInfo(userId, movieId)
 	if err != nil {
-		return 0.0, err
+		return []domain.CollectionInfo{}, err
 	}
 
-	return newRating, nil
-}
-
-func (mu movieUsecase) PostComment(movieId uint64, userId uint64, content string, commenttype int) (domain.Comment, error) {
-	var comtype string
-	if commenttype == 1 {
-		comtype = "good"
-	} else if commenttype == 2 {
-		comtype = "neutral"
-	} else if commenttype == 3 {
-		comtype = "bad"
-	} else {
-		return domain.Comment{}, domain.Err.ErrObj.InvalidCommentType
-	}
-
-	return mu.movieRepo.PostComment(movieId, userId, content, comtype)
+	return CollectionsInfo, nil
 }
