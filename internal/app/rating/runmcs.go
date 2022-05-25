@@ -1,10 +1,10 @@
 package mcsrtng
 
 import (
-	proto "codex/internal/pkg/rating/delivery/grpc"
-	"codex/internal/pkg/rating/repository"
-	"codex/internal/pkg/rating/usecase"
 	"codex/internal/pkg/database"
+	proto "codex/internal/pkg/rating/delivery/grpc"
+	ratrepository "codex/internal/pkg/rating/repository"
+	ratusecase "codex/internal/pkg/rating/usecase"
 	"codex/internal/pkg/utils/config"
 	"codex/internal/pkg/utils/log"
 
@@ -31,5 +31,9 @@ func RunServer() {
 		log.Error(err)
 	}
 
-	s.Serve(l)
+	err = s.Serve(l)
+	if err != nil{
+		log.Error(err)
+	}
+	
 }

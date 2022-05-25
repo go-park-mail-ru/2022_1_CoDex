@@ -6,24 +6,36 @@ import (
 	"codex/internal/pkg/utils/sanitizer"
 
 	"context"
-	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/mailru/easyjson"
 )
 
+type commentsResp struct {
+	Comment domain.Comment `json:"review"`
+}
+
+type commentReq struct {
+	MovieId string `json:"movieId"`
+	UserId  string `json:"userId"`
+	Content string `json:"reviewText"`
+	Type    string `json:"reviewType"` //int {1 2 3} {default: 2}
+}
+
 func (handler *CommentHandler) PostComment(w http.ResponseWriter, r *http.Request) {
-	type commentReq struct {
-		MovieId string `json:"movieId"`
-		UserId  string `json:"userId"`
-		Content string `json:"reviewText"`
-		Type    string `json:"reviewType"` //int {1 2 3} {default: 2}
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	defer r.Body.Close()
 	commentreq := new(commentReq)
-	err := json.NewDecoder(r.Body).Decode(&commentreq)
+	err = easyjson.Unmarshal(b, commentreq)
 	if err != nil {
-		http.Error(w, domain.Err.ErrObj.BadInput.Error(), http.StatusBadRequest)
+		http.Error(w, domain.Err.ErrObj.BadInput.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -58,11 +70,7 @@ func (handler *CommentHandler) PostComment(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	type commentsResp struct {
-		Comment domain.Comment `json:"review"`
-	}
-
-	out, err := json.Marshal(commentsResp{
+	out, err := easyjson.Marshal(commentsResp{
 		Comment: domain.Comment{
 			Imgsrc:   comm.Imgsrc,
 			Username: comm.Username,

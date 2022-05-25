@@ -4,10 +4,13 @@ import (
 	"codex/internal/pkg/domain"
 
 	"net/http"
-	"encoding/json"
-	
+
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 )
+
+//easyjson:json
+type Genres []domain.Genre
 
 func (handler *GenresHandler) GetGenre(w http.ResponseWriter, r *http.Request) {
 	genre := mux.Vars(r)["genre"]
@@ -22,7 +25,7 @@ func (handler *GenresHandler) GetGenre(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out, err := json.Marshal(genreWithMovies)
+	out, err := easyjson.Marshal(genreWithMovies)
 	if err != nil {
 		http.Error(w, domain.Err.ErrObj.InternalServer.Error(), http.StatusInternalServerError)
 		return
@@ -33,14 +36,13 @@ func (handler *GenresHandler) GetGenre(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *GenresHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
-
 	genres, err := handler.GenresUsecase.GetGenres()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	out, err := json.Marshal(genres)
+	out, err := easyjson.Marshal(Genres(genres))
 	if err != nil {
 		http.Error(w, domain.Err.ErrObj.InternalServer.Error(), http.StatusInternalServerError)
 		return

@@ -2,6 +2,7 @@ package colusecase
 
 import (
 	"codex/internal/pkg/domain"
+	"codex/internal/pkg/utils/addPreview"
 )
 
 type collectionsUsecase struct {
@@ -20,11 +21,16 @@ func (cu collectionsUsecase) GetCollection(id uint64) (domain.Collection, error)
 		return domain.Collection{}, err
 	}
 
+	for index := range coll.MovieList {
+		coll.MovieList[index].Poster = addPreview.ToMiniCopy(coll.MovieList[index].Poster)
+	}
+
 	return coll, err
 }
 
 func (cu collectionsUsecase) GetFeed() (domain.FeedResponse, error) {
 	feed, err := cu.collectionsRepo.GetFeed()
+	
 	if err != nil {
 		return domain.FeedResponse{}, err
 	}

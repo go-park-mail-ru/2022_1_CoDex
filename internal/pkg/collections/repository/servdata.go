@@ -56,6 +56,16 @@ func (cr *dbCollectionsRepository) GetCollection(id uint64) (domain.Collection, 
 	}
 	out.MovieList = movies
 
+	resp, err = cr.dbm.Query(queryGetCollectionUserId, id)
+	if err != nil {
+		log.Warn("{GetCollection} in query: " + queryGetCollectionUserId)
+		log.Error(err)
+		return domain.Collection{}, domain.Err.ErrObj.InternalServer
+	}
+	if len(resp) != 0 {
+		out.UserId = cast.IntToStr(cast.ToUint64(resp[0][0]))
+	}
+
 	return out, nil
 }
 

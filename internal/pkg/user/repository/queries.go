@@ -1,11 +1,6 @@
 package usrrepository
 
 const (
-	queryGetByEmail = `
-	SELECT id, username, email, imgsrc, password
-	FROM users
-	WHERE email = $1;
-	`
 
 	queryGetById = `
 	SELECT id, username, email, imgsrc
@@ -13,24 +8,16 @@ const (
 	WHERE id = $1;
 	`
 
-	queryAddUser = `
-	INSERT INTO
-		users (username, email, password)
-	VALUES
-		($1, $2, $3)
-	RETURNING id;
-	`
-
-	queryUpdateUser = `
-	UPDATE users
-	SET username = $1
-	WHERE id = $2;
-	`
-
 	queryGetUserRatings = `
 	SELECT movie_id, rating
 	FROM ratings
 	WHERE user_id = $1;
+	`
+	
+	queryUpdateUser = `
+	UPDATE users
+	SET username = $1
+	WHERE id = $2;
 	`
 
 	queryGetUserComments = `
@@ -39,7 +26,7 @@ const (
 	JOIN movies ON comments.movie_id = movies.id
 	WHERE comments.user_id = $1;
 	`
-	
+
 	queryUpdAvatarByUsID = `
 	UPDATE users 
 	SET imgsrc = $2
@@ -51,9 +38,9 @@ const (
 	FROM users
 	WHERE id = $1;
 	`
-	
+
 	queryGetUserBookmarks = `
-	SELECT playlists.id, playlists.title, playlists.poster
+	SELECT playlists.id, playlists.title, playlists.poster, playlists.public
 	FROM users_playlists
 	JOIN users ON users_playlists.user_id = users.id
 	JOIN playlists ON users_playlists.playlist_id = playlists.id

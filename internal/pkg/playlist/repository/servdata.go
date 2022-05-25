@@ -33,8 +33,10 @@ func (pr *dbplarepository) CreatePlaylist(playlist domain.PlaylistRequest) (doma
 	}
 
 	return domain.PlaylistResponse{
-		ID:    cast.IntToStr(cast.ToUint64(resp[0][0])),
-		Title: cast.ToString(resp[0][1]),
+		ID:     cast.IntToStr(cast.ToUint64(resp[0][0])),
+		Title:  cast.ToString(resp[0][1]),
+		ImgSrc: cast.ToString(resp[0][2]),
+		Public: cast.ToBool(resp[0][3]),
 	}, nil
 }
 
@@ -78,6 +80,17 @@ func (pr *dbplarepository) DeletePlaylist(deletePlaylistInfo domain.DeletePlayli
 	_, err := pr.dbm.Query(queryDeletePlaylist, deletePlaylistInfo.PlaylistId)
 	if err != nil {
 		log.Warn("{DeletePlaylist} in query: " + queryDeletePlaylist)
+		log.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func (pr *dbplarepository) AlterPlaylistPublic(alterPlaylistPublicInfo domain.AlterPlaylistPublicInfo) error {
+	_, err := pr.dbm.Query(queryAlterPlaylistPublic, alterPlaylistPublicInfo.PlaylistId, alterPlaylistPublicInfo.Public)
+	if err != nil {
+		log.Warn("{AlterPlaylistPublic} in query: " + queryAlterPlaylistPublic)
 		log.Error(err)
 		return err
 	}

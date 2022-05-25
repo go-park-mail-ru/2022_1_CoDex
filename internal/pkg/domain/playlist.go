@@ -20,8 +20,10 @@ func (pr PlaylistRequest) TitleIsValid() (isValid bool) {
 }
 
 type PlaylistResponse struct {
-	ID    string `json:"ID"`
-	Title string `json:"title"`
+	ID     string `json:"ID"`
+	Title  string `json:"title"`
+	ImgSrc string `json:"imgSrc"`
+	Public bool   `json:"public"`
 }
 
 type MovieInPlaylist struct {
@@ -33,12 +35,17 @@ type Playlist struct {
 	Id          string `json:"ID"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
-	Poster      string `json:"poster"`
+	ImgSrc      string `json:"imgSrc"`
 	Public      bool   `json:"public"`
 }
 
 type DeletePlaylistInfo struct {
 	PlaylistId string `json:"bookmarkId"`
+}
+
+type AlterPlaylistPublicInfo struct {
+	PlaylistId string `json:"bookmarkId"`
+	Public     bool   `json:"public"`
 }
 
 type PlaylistWithMovies struct {
@@ -54,6 +61,7 @@ type Plarepository interface {
 	DeleteMovie(movieDeleteInfo MovieInPlaylist) error
 	DeletePlaylist(deletePlaylistInfo DeletePlaylistInfo) error
 	PlaylistAlreadyExist(playlist PlaylistRequest) (bool, error)
+	AlterPlaylistPublic(alterPlaylistPublicInfo AlterPlaylistPublicInfo) error
 }
 
 type PlaylistUsecase interface {
@@ -61,4 +69,5 @@ type PlaylistUsecase interface {
 	AddMovie(addMovieInfo MovieInPlaylist) error
 	DeleteMovie(MovieInPlaylist MovieInPlaylist) error
 	DeletePlaylist(deletePlaylistInfo DeletePlaylistInfo) error
+	AlterPlaylistPublic(alterPlaylistPublicInfo AlterPlaylistPublicInfo) error
 }

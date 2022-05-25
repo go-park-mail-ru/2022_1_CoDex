@@ -7,25 +7,39 @@ import (
 	"codex/internal/pkg/utils/sanitizer"
 
 	"context"
-	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/mailru/easyjson"
 )
+
 type User struct {
-    Id             uint64 `json:"ID"`
-    Username       string `json:"username"`
-    Password       string `json:"password,omitempty"`
-    Email          string `json:"email"`
-    Imgsrc         string `json:"imgsrc"`
-    RepeatPassword string `json:"repeatpassword,omitempty"`
+	Id             uint64 `json:"ID"`
+	Username       string `json:"username"`
+	Password       string `json:"password,omitempty"`
+	Email          string `json:"email"`
+	Imgsrc         string `json:"imgsrc"`
+	RepeatPassword string `json:"repeatpassword,omitempty"`
+}
+
+type AuthResp struct {
+	Status string `json:"status"`
+	Id     string `json:"ID,omitempty"`
 }
 
 func (handler *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	userForm := new(domain.User)
-	err := json.NewDecoder(r.Body).Decode(&userForm)
 	if err != nil {
-		http.Error(w, domain.Err.ErrObj.BadInput.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userForm := new(domain.User)
+	err = easyjson.Unmarshal(b, userForm)
+	if err != nil {
+		http.Error(w, domain.Err.ErrObj.BadInput.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -50,7 +64,7 @@ func (handler *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out, err := json.Marshal(us)
+	out, err := easyjson.Marshal(us)
 	if err != nil {
 		http.Error(w, domain.Err.ErrObj.InternalServer.Error(), http.StatusInternalServerError)
 		return
@@ -61,11 +75,17 @@ func (handler *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	userForm := new(domain.UserBasic)
-	err := json.NewDecoder(r.Body).Decode(&userForm)
 	if err != nil {
-		http.Error(w, domain.Err.ErrObj.BadInput.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userForm := new(domain.UserBasic)
+	err = easyjson.Unmarshal(b, userForm)
+	if err != nil {
+		http.Error(w, domain.Err.ErrObj.BadInput.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -85,7 +105,7 @@ func (handler *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out, err := json.Marshal(us)
+	out, err := easyjson.Marshal(us)
 	if err != nil {
 		http.Error(w, domain.Err.ErrObj.InternalServer.Error(), http.StatusInternalServerError)
 		return
@@ -117,14 +137,9 @@ func (handler *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *AuthHandler) CheckAuth(w http.ResponseWriter, r *http.Request) {
-	type authResp struct {
-		Status string `json:"status"`
-		Id     string `json:"ID,omitempty"`
-	}
-
 	userId, err := sessions.CheckSession(r)
 	if err == domain.Err.ErrObj.UserNotLoggedIn {
-		out, err := json.Marshal(authResp{Status: strconv.Itoa(http.StatusBadRequest)})
+		out, err := easyjson.Marshal(AuthResp{Status: strconv.Itoa(http.StatusBadRequest)})
 		if err != nil {
 			http.Error(w, domain.Err.ErrObj.InternalServer.Error(), http.StatusInternalServerError)
 			return
@@ -139,7 +154,7 @@ func (handler *AuthHandler) CheckAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out, err := json.Marshal(authResp{
+	out, err := easyjson.Marshal(AuthResp{
 		Status: strconv.Itoa(http.StatusOK),
 		Id:     strconv.FormatUint(userId, 10),
 	})

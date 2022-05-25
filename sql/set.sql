@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS announced_announced   CASCADE;
 CREATE TABLE users (
     id                                  BIGSERIAL NOT NULL PRIMARY KEY,
     username                            VARCHAR(50) NOT NULL,
-    password                            VARCHAR(100) NOT NULL,
+    password                            VARCHAR(200) NOT NULL,
     email                               VARCHAR(50) NOT NULL,
     imgsrc                              VARCHAR(50) DEFAULT '/static/avatars/profile.svg'
 );
@@ -42,18 +42,18 @@ CREATE TABLE feed (
 );
 
 CREATE TABLE movies (
-    id                                  BIGSERIAL NOT NULL PRIMARY KEY,
+    id                                  BIGINT NOT NULL PRIMARY KEY,
     poster                              VARCHAR(50) NOT NULL,
-    title                               VARCHAR(50) NOT NULL,
-    titleoriginal                       VARCHAR(50) NOT NULL,
+    title                               VARCHAR(200) NOT NULL,
+    titleoriginal                       VARCHAR(200) NOT NULL,
     rating                              DOUBLE PRECISION NOT NULL,
     votesnum                            BIGINT NOT NULL,
-    info                                VARCHAR(100) NOT NULL,
-    description                         VARCHAR(1000) NOT NULL,
-    trailer                             VARCHAR(100) NOT NULL,
+    info                                VARCHAR(200) NOT NULL,
+    description                         VARCHAR(3000) NOT NULL,
+    trailer                             VARCHAR(200) NOT NULL,
     releaseyear                         VARCHAR(50) NOT NULL,
-    country                             VARCHAR(50) NOT NULL,
-    motto                               VARCHAR(200) NOT NULL,
+    country                             VARCHAR(200) NOT NULL,
+    motto                               VARCHAR(600) NOT NULL,
     director                            VARCHAR(50) NOT NULL,
     budget                              VARCHAR(50) NOT NULL,
     gross                               VARCHAR(50) NOT NULL,
@@ -65,23 +65,23 @@ CREATE TABLE announced (
     poster                              VARCHAR(50) NOT NULL,
     title                               VARCHAR(50) NOT NULL,
     titleoriginal                       VARCHAR(50) NOT NULL,
-    info                                VARCHAR(100) NOT NULL,
-    description                         VARCHAR(1000) NOT NULL,
-    trailer                             VARCHAR(100) NOT NULL,
-    releasedate                         TIMESTAMP NOT NULL,
+    info                                VARCHAR(200) NOT NULL,
+    description                         VARCHAR(2000) NOT NULL,
+    trailer                             VARCHAR(200) NOT NULL,
+    releasedate                         DATE NOT NULL,
     country                             VARCHAR(50) NOT NULL,
     director                            VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE actors (
-    id                                  BIGSERIAL NOT NULL PRIMARY KEY,
+    id                                  BIGINT NOT NULL PRIMARY KEY,
     imgsrc                              VARCHAR(50) NOT NULL,
-    name                                VARCHAR(100) NOT NULL,
-    nameoriginal                        VARCHAR(100) NOT NULL,
-    career                              VARCHAR(100) NOT NULL,
+    name                                VARCHAR(200) NOT NULL,
+    nameoriginal                        VARCHAR(200) NOT NULL,
+    career                              VARCHAR(200) NOT NULL,
     height                              VARCHAR(50) NOT NULL,
     birthday                            VARCHAR(50) NOT NULL,
-    birthplace                          VARCHAR(100) NOT NULL,
+    birthplace                          VARCHAR(200) NOT NULL,
     total                               BIGINT NOT NULL
 );
 
@@ -104,7 +104,7 @@ CREATE TABLE ratings (
 CREATE TABLE genres (
     genre                               VARCHAR(50) PRIMARY KEY,
     imgsrc                              VARCHAR(50),
-    description                         VARCHAR(100) NULL,
+    description                         VARCHAR(200) NULL,
     title                               VARCHAR(50) NULL
 );
 
@@ -164,7 +164,7 @@ CREATE TABLE announced_actors (
 );
 
 CREATE TABLE announced_announced (
-    announced_id                        BIGINT REFERENCES movies (id),
-    relation_id                         BIGINT REFERENCES movies (id),
+    announced_id                        BIGINT REFERENCES announced (id),
+    relation_id                         BIGINT REFERENCES announced (id),
     CONSTRAINT announced_announced_id   PRIMARY KEY (announced_id, relation_id)
 );

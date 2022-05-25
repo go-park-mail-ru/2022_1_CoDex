@@ -2,19 +2,21 @@ package usrdelivery
 
 import (
 	"codex/internal/pkg/domain"
-	"codex/internal/pkg/utils/log"
 	"codex/internal/pkg/utils/filesaver"
-	
-	"encoding/json"
-	"github.com/gorilla/mux"
+	"codex/internal/pkg/utils/log"
+
 	"fmt"
 	"net/http"
 	"path/filepath"
 	"strconv"
+	
+	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 )
 
 const (
-	root = "."
+	// root = "."
+	root = "/home/ubuntu/lolkek"
 	path = "/static/avatars/"
 )
 
@@ -54,12 +56,12 @@ func (handler *UserHandler) UploadAvatar(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	marshalledUs, err := json.Marshal(us)
+	marshalledUs, err := easyjson.Marshal(us)
 	if err != nil {
 		http.Error(w, domain.Err.ErrObj.InternalServer.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.WriteHeader(http.StatusOK)
 	w.Write(marshalledUs)
 }

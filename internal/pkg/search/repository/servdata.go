@@ -117,13 +117,13 @@ func (cr *dbSearchRepository) SearchAnnounced(tag string) (domain.SearchAnnounce
 		}, nil
 	}
 
-	anns := make([]domain.AnnouncedBasic, 0)
+	anns := make([]domain.AnnouncedSearch, 0)
 	for i := range resp {
-		anns = append(anns, domain.AnnouncedBasic{
+		anns = append(anns, domain.AnnouncedSearch{
 			Id:          cast.IntToStr(cast.ToUint64(resp[i][0])),
 			Poster:      cast.ToString(resp[i][1]),
 			Title:       cast.ToString(resp[i][2]),
-			// Releasedate: cast.TimeToStr(cast.ToTime(resp[i][3]), false),
+			Releasedate: cast.TimeToStr(cast.ToTime(resp[i][3]), false),
 			Info:        cast.ToString(resp[i][4]),
 			Description: cast.ToString(resp[i][5]),
 		})
@@ -183,7 +183,6 @@ func (cr *dbSearchRepository) SearchUsers(tag string) (domain.SearchUsersResp, e
 		usrs = append(usrs, domain.UserPublicInfo{
 			Id:       cast.ToUint64(resp[i][0]),
 			Username: cast.ToString(resp[i][1]),
-			Imgsrc:   cast.ToString(resp[i][2]),
 		})
 	}
 

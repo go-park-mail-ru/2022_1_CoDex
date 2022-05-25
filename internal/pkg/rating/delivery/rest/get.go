@@ -4,25 +4,27 @@ import (
 	"codex/internal/pkg/domain"
 	"codex/internal/pkg/rating/delivery/grpc"
 	"codex/internal/pkg/utils/cast"
-
+	
+	"io/ioutil"
 	"context"
-	"encoding/json"
 	"net/http"
 	"strconv"
+
+	"github.com/mailru/easyjson"
 )
 
 func (handler *RatingHandler) PostRating(w http.ResponseWriter, r *http.Request) {
-	type ratingReq struct {
-		MovieId string `json:"movieId"`
-		UserId  string `json:"userId"`
-		Rating  string `json:"rating"`
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	defer r.Body.Close()
-	ratingreq := new(ratingReq)
-	err := json.NewDecoder(r.Body).Decode(&ratingreq)
+	ratingreq := new(RatingReq)
+	err = easyjson.Unmarshal(b, ratingreq)
 	if err != nil {
-		http.Error(w, domain.Err.ErrObj.BadInput.Error(), http.StatusBadRequest)
+		http.Error(w, domain.Err.ErrObj.BadInput.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -54,11 +56,7 @@ func (handler *RatingHandler) PostRating(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	type ratingResp struct {
-		NewMovieRating string `json:"newrating"`
-	}
-
-	out, err := json.Marshal(ratingResp{
+	out, err := easyjson.Marshal(RatingResp{
 		NewMovieRating: cast.FlToStr(float64(movieRating.GetRating())),
 	})
 	if err != nil {

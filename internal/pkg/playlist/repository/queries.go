@@ -6,7 +6,7 @@ const (
 		playlists (title, public)
 	VALUES
 		($1, $2)
-	RETURNING id, title;
+	RETURNING id, title, poster, public;
 	`
 
 	queryCreatePlaylistUser = `
@@ -37,6 +37,12 @@ const (
 
 	queryDeletePlaylist = `
 	DELETE FROM playlists
+	WHERE id = $1;
+	`
+
+	queryAlterPlaylistPublic = `
+	UPDATE playlists 
+	SET public = $2
 	WHERE id = $1;
 	`
 )

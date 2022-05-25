@@ -1,6 +1,6 @@
 package domain
 
-const BaseUserPicture = "/static/avatars/profile.svg"
+const BaseUserPicture = "/home/ubuntu/lolkek/static/avatars/profile.svg"
 
 type User struct {
 	Id             uint64 `json:"ID"`
@@ -25,12 +25,15 @@ type UserBasic struct {
 type UserPublicInfo struct {
 	Id       uint64 `json:"ID"`
 	Username string `json:"name"`
-	Imgsrc   string `json:"imgsrc"`
 }
 
 type UpdUser struct {
 	Username string `json:"username"`
 	Imgsrc   string `json:"imgsrc"`
+}
+
+type UserNotificationToken struct {
+	Token string `json:"token"`
 }
 
 type UserRepository interface {

@@ -31,5 +31,12 @@ protoc -I internal/pkg/?/delivery/grpc/ --go_out=. --go-grpc_out=. internal/pkg/
 
 __________MOCK__________
 install:
-    export GOPATH=$HOME/go
-    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+    export GOPATH=$HOME/go && export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+
+__________EJSN__________
+install:
+    go get github.com/mailru/easyjson && go install github.com/mailru/easyjson/...@latest
+
+useage:
+    easyjson -all -no_std_marshalers *

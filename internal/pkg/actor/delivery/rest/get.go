@@ -3,10 +3,11 @@ package actdelivery
 import (
 	"codex/internal/pkg/domain"
 
-	"encoding/json"
-	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 )
 
 func (handler *ActorHandler) GetActor(w http.ResponseWriter, r *http.Request) {
@@ -35,10 +36,10 @@ func (handler *ActorHandler) GetActor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out, err := json.Marshal(domain.ActorResponse{
-		Person: actor,
-		Related:  related,
-		Movies:    movies,
+	out, err := easyjson.Marshal(domain.ActorResponse{
+		Person:  actor,
+		Related: related,
+		Movies:  movies,
 	})
 	if err != nil {
 		http.Error(w, domain.Err.ErrObj.InternalServer.Error(), http.StatusInternalServerError)

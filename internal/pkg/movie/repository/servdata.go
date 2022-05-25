@@ -73,28 +73,27 @@ func (mr *dbMovieRepository) GetMovie(id uint64) (domain.Movie, error) {
 
 	out.Actors = actors
 
-
-
 	resp, err = mr.dbm.Query(queryGetMovieGenres, id)
 	if err != nil {
 		log.Warn("{GetMovie} in query: " + queryGetMovieGenres)
 		log.Error(err)
 		return domain.Movie{}, domain.Err.ErrObj.InternalServer
 	}
-	if len(resp) == 0 {
-		log.Warn("{GetMovie} no genres")
-		log.Error(domain.Err.ErrObj.SmallDb)
-		return domain.Movie{}, domain.Err.ErrObj.SmallDb
-	}
-
+	// if len(resp) == 0 {
+	// 	log.Warn("{GetMovie} no genres")
+	// 	log.Error(domain.Err.ErrObj.SmallDb)
+	// 	return domain.Movie{}, domain.Err.ErrObj.SmallDb
+	// }
 	genres := make([]domain.GenreInMovie, 0)
-	for i := range resp {
-		genres = append(genres, domain.GenreInMovie{
-			Href: "/genres/" + cast.ToString(resp[i][0]),
-			Title: cast.ToString(resp[i][1]),
-		})
-	}
+	if len(resp) != 0 {
+		for i := range resp {
+			genres = append(genres, domain.GenreInMovie{
+				Href:  "/genres/" + cast.ToString(resp[i][0]),
+				Title: cast.ToString(resp[i][1]),
+			})
+		}
 
+	}
 	out.Genres = genres
 
 	return out, nil
@@ -195,8 +194,8 @@ func (mr *dbMovieRepository) GetReviewRating(movieId, userId uint64) (string, st
 	return reviewExist, userRating, nil
 }
 
-func (mr *dbMovieRepository) GetCollectionsInfo( userId, movieId uint64 ) ([]domain.CollectionInfo, error) {
-	resp, err := mr.dbm.Query(queryGetPlaylists,  userId)
+func (mr *dbMovieRepository) GetCollectionsInfo(userId, movieId uint64) ([]domain.CollectionInfo, error) {
+	resp, err := mr.dbm.Query(queryGetPlaylists, userId)
 	if err != nil {
 		log.Warn("{GetCollectionsInfo} in query: " + queryGetPlaylists)
 		log.Error(err)
@@ -208,7 +207,7 @@ func (mr *dbMovieRepository) GetCollectionsInfo( userId, movieId uint64 ) ([]dom
 	for i := range resp {
 		CollectionInfo := domain.CollectionInfo{
 			Collection: cast.ToString(resp[i][0]),
-    		BookmarkId :  cast.ToUint64(resp[i][1]),
+			BookmarkId: cast.ToUint64(resp[i][1]),
 		}
 
 		tmp, err := mr.dbm.Query(queryGetFilmAvailability, CollectionInfo.BookmarkId, movieId)
